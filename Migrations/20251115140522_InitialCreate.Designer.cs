@@ -10,7 +10,7 @@ using WordledDictionaryApi.Data;
 namespace WordledDictionaryApi.Migrations
 {
     [DbContext(typeof(DictionaryContext))]
-    [Migration("20251109165243_InitialCreate")]
+    [Migration("20251115140522_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -24,10 +24,6 @@ namespace WordledDictionaryApi.Migrations
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
-
-                    b.Property<string>("Definition")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
 
                     b.Property<string>("Word")
                         .IsRequired()

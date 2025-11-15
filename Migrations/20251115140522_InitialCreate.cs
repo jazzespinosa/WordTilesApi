@@ -16,8 +16,7 @@ namespace WordledDictionaryApi.Migrations
                 {
                     Id = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    Word = table.Column<string>(type: "TEXT", nullable: false),
-                    Definition = table.Column<string>(type: "TEXT", nullable: false)
+                    Word = table.Column<string>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {

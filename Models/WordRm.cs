@@ -1,10 +1,9 @@
 namespace WordledDictionaryApi.Models
 {
-    public class DictionaryEntry
+    public class WordRm
     {
         public int Id { get; set; }
-        public required Word Word { get; set; }
-
+        public string Word { get; set; } = string.Empty;
     }
 
 }

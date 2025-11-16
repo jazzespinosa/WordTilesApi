@@ -1,7 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using WordledDictionaryApi.Data;
-using WordledDictionaryApi.Models;
+using WordledDictionaryApi.Models.DTOs;
+using WordledDictionaryApi.Models.Entities;
 
 namespace WordledDictionaryApi.Controllers
 {
@@ -9,9 +10,9 @@ namespace WordledDictionaryApi.Controllers
     [Route("api/[controller]")]
     public class DictionaryController : ControllerBase
     {
-        private readonly DictionaryContext _context;
+        private readonly GameContext _context;
 
-        public DictionaryController(DictionaryContext context)
+        public DictionaryController(GameContext context)
         {
             _context = context;
         }
@@ -20,7 +21,7 @@ namespace WordledDictionaryApi.Controllers
         [HttpGet("word/{word}")]
         public async Task<IActionResult> GetWord(string word)
         {
-            var entry = await _context.Entries
+            var entry = await _context.ValidWords
                 .FirstOrDefaultAsync(e => e.Word.Value.ToLower() == word.ToLower());
 
             if (entry == null)
@@ -30,26 +31,26 @@ namespace WordledDictionaryApi.Controllers
         }
 
         // GET: api/dictionary/length/3
-        [HttpGet("length/{wordLength}")]
-        public async Task<IActionResult> GetRandomWordByLength(int wordLength)
-        {
-            var words = await _context.Entries
-                .Where(e => e.Word.Length == wordLength)
-                .ToListAsync();
+        // [HttpGet("length/{wordLength}")]
+        // public async Task<IActionResult> GetRandomWordByLength(int wordLength)
+        // {
+        //     var words = await _context.Entries
+        //         .Where(e => e.Word.Length == wordLength)
+        //         .ToListAsync();
 
-            if (words.Count == 0)
-                return NotFound($"No words of length {wordLength} found.");
+        //     if (words.Count == 0)
+        //         return NotFound($"No words of length {wordLength} found.");
 
-            var randomIndex = new Random().Next(words.Count);
-            var randomWord = words[randomIndex];
-            var output = new
-            {
-                Word = randomWord.Word.Value,
-                Length = randomWord.Word.Length
-            };
+        //     var randomIndex = new Random().Next(words.Count);
+        //     var randomWord = words[randomIndex];
+        //     var output = new
+        //     {
+        //         Word = randomWord.Word.Value,
+        //         Length = randomWord.Word.Length
+        //     };
 
-            return Ok(output);
-        }
+        //     return Ok(output);
+        // }
 
         // // GET: api/dictionary/search?term=ca
         // [HttpGet("search")]
@@ -64,7 +65,7 @@ namespace WordledDictionaryApi.Controllers
 
         // POST: api/dictionary
         [HttpPost]
-        public async Task<IActionResult> AddWord([FromBody] WordRm[] entries)
+        public async Task<IActionResult> AddWord([FromBody] WordDto[] entries)
         {
             if (entries == null || entries.Length == 0)
             {
@@ -80,7 +81,7 @@ namespace WordledDictionaryApi.Controllers
                         Word = new Word(item.Word)
                     };
 
-                    _context.Entries.Add(entry);
+                    _context.ValidWords.Add(entry);
                 }
                 await _context.SaveChangesAsync();
                 return CreatedAtAction(nameof(GetWord), new { word = entries }, entries);

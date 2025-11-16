@@ -5,13 +5,24 @@ using Microsoft.EntityFrameworkCore;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add DbContext
-builder.Services.AddDbContext<DictionaryContext>(options =>
-    options.UseSqlite(builder.Configuration.GetConnectionString("DictionaryConnection")));
+builder.Services.AddDbContext<GameContext>(options =>
+    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // Add controllers
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(
+        policy =>
+        {
+            policy.WithOrigins("http://localhost:4200")
+                  .AllowAnyHeader()
+                  .AllowAnyMethod();
+        });
+});
 
 // Add services to the container.
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
@@ -22,8 +33,8 @@ var app = builder.Build();
 // Apply migrations automatically (optional)
 using (var scope = app.Services.CreateScope())
 {
-    var db = scope.ServiceProvider.GetRequiredService<DictionaryContext>();
-    db.Database.Migrate();
+    var gameDb = scope.ServiceProvider.GetRequiredService<GameContext>();
+    gameDb.Database.Migrate();
 }
 
 // Configure the HTTP request pipeline.
@@ -32,6 +43,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.UseCors();
 
 app.UseHttpsRedirection();
 app.MapControllers();

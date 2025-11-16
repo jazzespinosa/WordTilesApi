@@ -1,4 +1,4 @@
-namespace WordledDictionaryApi.Models
+namespace WordledDictionaryApi.Models.Entities
 {
     public class DictionaryEntry
     {

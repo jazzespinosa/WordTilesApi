@@ -1,31 +1,36 @@
-using Microsoft.EntityFrameworkCore;
-using WordledDictionaryApi.Models;
+// using Microsoft.EntityFrameworkCore;
+// using WordledDictionaryApi.Models.Entities;
 
-namespace WordledDictionaryApi.Data
-{
-    public class DictionaryContext : DbContext
-    {
-        public DictionaryContext(DbContextOptions<DictionaryContext> options)
-            : base(options)
-        {
-        }
+// namespace WordledDictionaryApi.Data
+// {
+//     public class DictionaryContext : DbContext
+//     {
+//         public DictionaryContext(DbContextOptions<DictionaryContext> options)
+//             : base(options)
+//         {
+//         }
 
-        // public DbSet<DictionaryEntry> Entries => Set<DictionaryEntry>();
-        public DbSet<DictionaryEntry> Entries { get; set; }
+//         // public DbSet<DictionaryEntry> Entries => Set<DictionaryEntry>();
+//         public DbSet<DictionaryEntry> ValidWords { get; set; }
 
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
-        {
-            modelBuilder.Entity<DictionaryEntry>(entity =>
-            {
-                entity.HasKey(e => e.Id);
-                entity.OwnsOne(e => e.Word, word =>
-                {
-                    word.Property(w => w.Value).HasColumnType("string").IsRequired();
-                    word.Property(w => w.Length).HasColumnType("int").IsRequired();
-                });
-            });
+//         protected override void OnModelCreating(ModelBuilder modelBuilder)
+//         {
+//             // modelBuilder.HasDefaultSchema("dictionary");
+//             // modelBuilder.ApplyConfiguration(new DictionaryEntryConfiguration());
+//             // base.OnModelCreating(modelBuilder);
 
-            // Configure any additional properties or customize the configuration as needed
-        }
-    }
-}
+
+//             modelBuilder.Entity<DictionaryEntry>(entity =>
+//             {
+//                 entity.HasKey(e => e.Id);
+//                 entity.OwnsOne(e => e.Word, word =>
+//                 {
+//                     word.Property(w => w.Value).HasColumnType("string").IsRequired();
+//                     word.Property(w => w.Length).HasColumnType("int").IsRequired();
+//                 });
+//             });
+
+//             // Configure any additional properties or customize the configuration as needed
+//         }
+//     }
+// }

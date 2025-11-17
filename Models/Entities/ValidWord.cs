@@ -1,9 +1,9 @@
 namespace WordledDictionaryApi.Models.Entities
 {
-    public class DictionaryEntry
+    public class ValidWord
     {
         public int Id { get; set; }
-        public required Word Word { get; set; }
+        public required WordData Word { get; set; }
 
     }
 

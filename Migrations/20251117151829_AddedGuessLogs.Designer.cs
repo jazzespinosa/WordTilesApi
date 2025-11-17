@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using WordledDictionaryApi.Data;
 
@@ -10,9 +11,11 @@ using WordledDictionaryApi.Data;
 namespace WordledDictionaryApi.Migrations
 {
     [DbContext(typeof(GameContext))]
-    partial class GameContextModelSnapshot : ModelSnapshot
+    [Migration("20251117151829_AddedGuessLogs")]
+    partial class AddedGuessLogs
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.10");
@@ -40,6 +43,9 @@ namespace WordledDictionaryApi.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT");
 
+                    b.Property<int>("AttemptNumber")
+                        .HasColumnType("INTEGER");
+
                     b.Property<Guid>("GameId")
                         .HasColumnType("TEXT");
 
@@ -51,9 +57,6 @@ namespace WordledDictionaryApi.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<bool>("IsCorrect")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("Turn")
                         .HasColumnType("INTEGER");
 
                     b.HasKey("TransactionId");

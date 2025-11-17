@@ -8,11 +8,11 @@ namespace WordledDictionaryApi.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class DictionaryController : ControllerBase
+    public class ValidWordController : ControllerBase
     {
         private readonly GameContext _context;
 
-        public DictionaryController(GameContext context)
+        public ValidWordController(GameContext context)
         {
             _context = context;
         }
@@ -22,7 +22,7 @@ namespace WordledDictionaryApi.Controllers
         public async Task<IActionResult> GetWord(string word)
         {
             var entry = await _context.ValidWords
-                .FirstOrDefaultAsync(e => e.Word.Value.ToLower() == word.ToLower());
+                .FirstOrDefaultAsync(w => w.Word.Value.ToLower() == word.ToLower());
 
             if (entry == null)
                 return NotFound($"The word '{word}' was not found.");
@@ -75,10 +75,10 @@ namespace WordledDictionaryApi.Controllers
             {
                 foreach (var item in entries)
                 {
-                    var entry = new DictionaryEntry
+                    var entry = new ValidWord
                     {
                         Id = 0,
-                        Word = new Word(item.Word)
+                        Word = new WordData(item.Word)
                     };
 
                     _context.ValidWords.Add(entry);

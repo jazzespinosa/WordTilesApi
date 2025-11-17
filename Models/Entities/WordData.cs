@@ -1,14 +1,14 @@
 namespace WordledDictionaryApi.Models.Entities
 {
-    public class Word
+    public class WordData
     {
-        public Word(string word)
+        public WordData(string word)
         {
             Value = word;
             Length = word.Length;
         }
 
-        public Word()
+        public WordData()
         {
             Value = string.Empty;
             Length = 0;

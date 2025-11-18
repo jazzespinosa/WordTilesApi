@@ -9,7 +9,7 @@ public class WordsConfiguration : IEntityTypeConfiguration<ValidWord>
         builder.HasKey(e => e.Id);
         builder.OwnsOne(e => e.Word, word =>
         {
-            word.Property(w => w.Value).HasColumnType("string").IsRequired();
+            word.Property(w => w.Value).HasColumnType("string").IsRequired().UseCollation("NOCASE");
             word.Property(w => w.Length).HasColumnType("int").IsRequired();
         });
     }

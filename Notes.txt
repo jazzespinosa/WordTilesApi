@@ -1,0 +1,6 @@
+To dos and Suggestions:
+- implement a game service
+- implement transactions in EF Core
+- enhance turn handling
+- adding model validation - [Required]
+- separate the DTO for request and response

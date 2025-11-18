@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations.Schema;
+
 namespace WordledDictionaryApi.Models.Entities
 {
     public class WordData
@@ -14,7 +16,9 @@ namespace WordledDictionaryApi.Models.Entities
             Length = 0;
         }
 
+        [Column("word_value")]
         public string Value { get; }
+        [Column("word_length")]
         public int Length { get; private set; }
     }
 }

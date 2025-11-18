@@ -28,12 +28,12 @@ namespace WordledDictionaryApi.Controllers
                 return NotFound($"No words of length {newGameDto.WordLength} found.");
 
             var randomIndex = new Random().Next(words.Count);
-            var randomWord = words[randomIndex];
+            var gameWord = words[randomIndex];
 
-            var gameData = new GamesData
+            var gameData = new GameData
             {
                 GameId = Guid.NewGuid(),
-                Word = randomWord.Word,
+                Word = gameWord.Word,
                 PlayerId = newGameDto.PlayerId,
                 MaxTurns = newGameDto.MaxTurns
             };
@@ -53,38 +53,38 @@ namespace WordledDictionaryApi.Controllers
         }
 
 
-        // GET: api/guess/{word}?turn=1
         [HttpPost("guess")]
-        public async Task<IActionResult> GetWord([FromBody] GuessDto guessDto)
+        public async Task<IActionResult> Guess([FromBody] GuessDto guessDto)
         {
+            //check if game exists
+            var game = await _gameContext.GamesData
+                .FirstOrDefaultAsync(g => g.PlayerId == guessDto.PlayerId && g.GameId == guessDto.GameId);
+            if (game == null)
+                return NotFound($"Game with ID '{guessDto.GameId}' for Player '{guessDto.PlayerId}' was not found.");
+
             //check if turn is valid
-            var maxTurn = _gameContext.GamesData
-                .Where(g => g.PlayerId == guessDto.PlayerId && g.GameId == guessDto.GameId)
-                .Select(g => g.MaxTurns)
-                .FirstOrDefault();
+            var maxTurn = game.MaxTurns;
             if (guessDto.Turn <= 0 || guessDto.Turn > maxTurn)
-            {
                 return BadRequest("Turn number must be greater than zero.");
-            }
+            /// need to validate turn logic more thoroughly
+            /// eg. prevent duplicate turns, ensure turns are sequential, etc.
 
             //check if guess is valid
             var guess = guessDto.Guess;
             if (string.IsNullOrWhiteSpace(guess))
-            {
                 return BadRequest("Guess cannot be empty.");
-            }
-            var entry = await _gameContext.ValidWords
-                .FirstOrDefaultAsync(w => w.Word.Value.ToLower() == guess.ToLower());
 
+            var entry = await _gameContext.ValidWords
+                .FirstOrDefaultAsync(w => w.Word.Value == guess);
             if (entry == null)
                 return BadRequest($"Invalid guess word - '{guess}'.");
 
             //prepare guess log
-            var guessLog = new GuessLogs
+            var guessLog = new GuessLog
             {
                 TransactionId = Guid.NewGuid(),
                 GameId = guessDto.GameId,
-                Guess = guess.ToUpper(),
+                Guess = guess,
                 GuessTime = DateTime.UtcNow,
                 IsCorrect = false,
                 Turn = guessDto.Turn
@@ -95,30 +95,26 @@ namespace WordledDictionaryApi.Controllers
             {
                 GameId = guessDto.GameId,
                 PlayerId = guessDto.PlayerId,
-                Guess = guessDto.Guess.ToUpper(),
-                Turn = guessDto.Turn + 1,
+                Guess = guessDto.Guess,
+                Turn = guessDto.Turn + 1, // increment turn for next guess ???
                 IsCorrect = false
             };
 
             //check if word matches game word
-            var gameWord = _gameContext.GamesData
-                .Where(g => g.PlayerId == guessDto.PlayerId && g.GameId == guessDto.GameId)
-                .Select(g => g.Word.Value)
-                .FirstOrDefault();
-
-            if (guess.ToUpper() != gameWord?.ToUpper())
+            var gameWord = game.Word.Value;
+            if (guess == gameWord)
             {
-                // return BadRequest( $"The word '{guess}' does not match the game word '{gameWord}'.");
+                result.IsCorrect = true;
+                guessLog.IsCorrect = true;
                 _gameContext.GuessLogs.Add(guessLog);
                 await _gameContext.SaveChangesAsync();
+
                 return Ok(result);
             }
 
-            result.IsCorrect = true;
-            guessLog.IsCorrect = true;
+            // return BadRequest( $"The word '{guess}' does not match the game word '{gameWord}'.");
             _gameContext.GuessLogs.Add(guessLog);
             await _gameContext.SaveChangesAsync();
-
             return Ok(result);
         }
 

@@ -11,16 +11,16 @@ namespace WordledDictionaryApi.Data
         {
         }
 
-        public DbSet<GamesData> GamesData { get; set; }
+        public DbSet<GameData> GamesData { get; set; }
         public DbSet<ValidWord> ValidWords { get; set; }
-        public DbSet<GuessLogs> GuessLogs { get; set; }
+        public DbSet<GuessLog> GuessLogs { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.ApplyConfigurationsFromAssembly(typeof(GamesData).Assembly);
+            modelBuilder.ApplyConfigurationsFromAssembly(typeof(GameData).Assembly);
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(ValidWord).Assembly);
 
-            modelBuilder.Entity<GuessLogs>(entity =>
+            modelBuilder.Entity<GuessLog>(entity =>
             {
                 entity.HasKey(e => e.TransactionId);
             });

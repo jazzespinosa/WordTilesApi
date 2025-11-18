@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using WordledDictionaryApi.Data;
 
@@ -10,9 +11,11 @@ using WordledDictionaryApi.Data;
 namespace WordledDictionaryApi.Migrations
 {
     [DbContext(typeof(GameContext))]
-    partial class GameContextModelSnapshot : ModelSnapshot
+    [Migration("20251118140532_[UpdateColumnNames]")]
+    partial class UpdateColumnNames
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.10");
@@ -37,7 +40,7 @@ namespace WordledDictionaryApi.Migrations
                     b.ToTable("GamesData");
                 });
 
-            modelBuilder.Entity("WordledDictionaryApi.Models.Entities.GuessLog", b =>
+            modelBuilder.Entity("WordledDictionaryApi.Models.Entities.GuessLogs", b =>
                 {
                     b.Property<Guid>("TransactionId")
                         .ValueGeneratedOnAdd()
@@ -91,12 +94,12 @@ namespace WordledDictionaryApi.Migrations
 
                             b1.Property<int>("Length")
                                 .HasColumnType("int")
-                                .HasColumnName("word_length");
+                                .HasColumnName("length");
 
                             b1.Property<string>("Value")
                                 .IsRequired()
                                 .HasColumnType("string")
-                                .HasColumnName("word_value");
+                                .HasColumnName("value");
 
                             b1.HasKey("GameDataGameId");
 
@@ -119,13 +122,12 @@ namespace WordledDictionaryApi.Migrations
 
                             b1.Property<int>("Length")
                                 .HasColumnType("int")
-                                .HasColumnName("word_length");
+                                .HasColumnName("length");
 
                             b1.Property<string>("Value")
                                 .IsRequired()
                                 .HasColumnType("string")
-                                .HasColumnName("word_value")
-                                .UseCollation("NOCASE");
+                                .HasColumnName("value");
 
                             b1.HasKey("ValidWordId");
 

@@ -5,9 +5,9 @@ namespace WordledDictionaryApi.Models.Entities
     public class GuessLog
     {
         [Column("transaction_id")]
-        public Guid TransactionId { get; set; }
+        public int TransactionId { get; set; }
         [Column("game_id")]
-        public Guid GameId { get; set; }
+        public int GameId { get; set; }
         [Column("guess")]
         public required string Guess { get; set; }
         [Column("guess_time")]

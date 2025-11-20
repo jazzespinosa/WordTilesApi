@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using WordledDictionaryApi.Data;
 
@@ -10,16 +11,18 @@ using WordledDictionaryApi.Data;
 namespace WordledDictionaryApi.Migrations
 {
     [DbContext(typeof(GameContext))]
-    partial class GameContextModelSnapshot : ModelSnapshot
+    [Migration("20251120144401_[ChangeDataType]")]
+    partial class ChangeDataType
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.10");
 
             modelBuilder.Entity("WordledDictionaryApi.Models.Entities.GameData", b =>
                 {
-                    b.Property<int>("GameId")
+                    b.Property<ulong>("GameId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER")
                         .HasColumnName("game_id");
@@ -28,8 +31,8 @@ namespace WordledDictionaryApi.Migrations
                         .HasColumnType("INTEGER")
                         .HasColumnName("max_turns");
 
-                    b.Property<int>("PlayerId")
-                        .HasColumnType("INTEGER")
+                    b.Property<Guid>("PlayerId")
+                        .HasColumnType("TEXT")
                         .HasColumnName("player_id");
 
                     b.HasKey("GameId");
@@ -39,12 +42,12 @@ namespace WordledDictionaryApi.Migrations
 
             modelBuilder.Entity("WordledDictionaryApi.Models.Entities.GuessLog", b =>
                 {
-                    b.Property<int>("TransactionId")
+                    b.Property<ulong>("TransactionId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER")
                         .HasColumnName("transaction_id");
 
-                    b.Property<int>("GameId")
+                    b.Property<ulong>("GameId")
                         .HasColumnType("INTEGER")
                         .HasColumnName("game_id");
 
@@ -86,7 +89,7 @@ namespace WordledDictionaryApi.Migrations
                 {
                     b.OwnsOne("WordledDictionaryApi.Models.Entities.WordData", "Word", b1 =>
                         {
-                            b1.Property<int>("GameDataGameId")
+                            b1.Property<ulong>("GameDataGameId")
                                 .HasColumnType("INTEGER");
 
                             b1.Property<int>("Length")

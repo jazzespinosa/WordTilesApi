@@ -3,4 +3,4 @@ To dos and Suggestions:
 - implement transactions in EF Core
 - enhance turn handling
 - adding model validation - [Required]
-- separate the DTO for request and response
+- separate the DTO for request and response : Done

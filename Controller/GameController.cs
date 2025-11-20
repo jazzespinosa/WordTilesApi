@@ -32,7 +32,6 @@ namespace WordledDictionaryApi.Controllers
 
             var gameData = new GameData
             {
-                GameId = Guid.NewGuid(),
                 Word = gameWord.Word,
                 PlayerId = newGameDto.PlayerId,
                 MaxTurns = newGameDto.MaxTurns
@@ -52,25 +51,31 @@ namespace WordledDictionaryApi.Controllers
 
         }
 
-
         [HttpPost("guess")]
-        public async Task<IActionResult> Guess([FromBody] GuessDto guessDto)
+        public async Task<IActionResult> Guess([FromBody] GuessRequestDto guessRequestDto)
         {
             //check if game exists
             var game = await _gameContext.GamesData
-                .FirstOrDefaultAsync(g => g.PlayerId == guessDto.PlayerId && g.GameId == guessDto.GameId);
+                .FirstOrDefaultAsync(g => g.PlayerId == guessRequestDto.PlayerId && g.GameId == guessRequestDto.GameId);
             if (game == null)
-                return NotFound($"Game with ID '{guessDto.GameId}' for Player '{guessDto.PlayerId}' was not found.");
+                return NotFound($"Game with ID '{guessRequestDto.GameId}' for Player '{guessRequestDto.PlayerId}' was not found.");
 
             //check if turn is valid
             var maxTurn = game.MaxTurns;
-            if (guessDto.Turn <= 0 || guessDto.Turn > maxTurn)
+
+            // var currentTurn = await _gameContext.GuessLogs
+            //     .Where(gl => gl.GameId == game.GameId)
+            //     .CountAsync() + 1;
+            // if (currentTurn >= maxTurn)
+            //     return BadRequest("Maximum number of turns exceeded for this game.");
+
+            if (guessRequestDto.Turn <= 0 || guessRequestDto.Turn > maxTurn)
                 return BadRequest("Turn number must be greater than zero.");
             /// need to validate turn logic more thoroughly
             /// eg. prevent duplicate turns, ensure turns are sequential, etc.
 
             //check if guess is valid
-            var guess = guessDto.Guess;
+            var guess = guessRequestDto.Guess;
             if (string.IsNullOrWhiteSpace(guess))
                 return BadRequest("Guess cannot be empty.");
 
@@ -82,21 +87,20 @@ namespace WordledDictionaryApi.Controllers
             //prepare guess log
             var guessLog = new GuessLog
             {
-                TransactionId = Guid.NewGuid(),
-                GameId = guessDto.GameId,
+                GameId = guessRequestDto.GameId,
                 Guess = guess,
                 GuessTime = DateTime.UtcNow,
                 IsCorrect = false,
-                Turn = guessDto.Turn
+                Turn = guessRequestDto.Turn
             };
 
             //prepare result
-            var result = new GuessDto
+            var result = new GuessResponseDto
             {
-                GameId = guessDto.GameId,
-                PlayerId = guessDto.PlayerId,
-                Guess = guessDto.Guess,
-                Turn = guessDto.Turn + 1, // increment turn for next guess ???
+                GameId = guessRequestDto.GameId,
+                PlayerId = guessRequestDto.PlayerId,
+                Guess = guessRequestDto.Guess,
+                Turn = guessRequestDto.Turn + 1, // increment turn for next guess ???
                 IsCorrect = false
             };
 

@@ -19,14 +19,9 @@ namespace WordledDictionaryApi.Data
         {
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(GameData).Assembly);
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(ValidWord).Assembly);
+            modelBuilder.ApplyConfigurationsFromAssembly(typeof(GuessLog).Assembly);
 
-            modelBuilder.Entity<GuessLog>(entity =>
-            {
-                entity.HasKey(e => e.TransactionId);
-            });
-
-
-            // Configure any additional properties or customize the configuration as needed
+            base.OnModelCreating(modelBuilder);
         }
 
     }

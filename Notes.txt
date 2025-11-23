@@ -1,4 +1,5 @@
 To dos and Suggestions:
+- make the api endpoint secure (keys???, JWT, OAuth)
 - implement a game service
 - implement transactions in EF Core
 - enhance turn handling

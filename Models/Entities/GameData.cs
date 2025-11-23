@@ -8,8 +8,10 @@ namespace WordledDictionaryApi.Models.Entities
         public int GameId { get; set; }
         public required WordData Word { get; set; }
         [Column("player_id")]
-        public int PlayerId { get; set; }
+        public Guid PlayerId { get; set; }
         [Column("max_turns")]
         public int MaxTurns { get; set; }
+
+        public ICollection<GuessLog> GuessLogs { get; set; } = new List<GuessLog>();
     }
 }

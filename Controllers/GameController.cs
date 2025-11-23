@@ -11,10 +11,12 @@ namespace WordledDictionaryApi.Controllers
     public class GameController : ControllerBase
     {
         private readonly GameContext _gameContext;
+        private readonly IGameService _service;
 
-        public GameController(GameContext gameContext)
+        public GameController(GameContext gameContext, IGameService service)
         {
             _gameContext = gameContext;
+            _service = service;
         }
 
         [HttpPost("newgame")]
@@ -55,22 +57,16 @@ namespace WordledDictionaryApi.Controllers
         public async Task<IActionResult> Guess([FromBody] GuessRequestDto guessRequestDto)
         {
             //check if game exists
-            var game = await _gameContext.GamesData
-                .FirstOrDefaultAsync(g => g.PlayerId == guessRequestDto.PlayerId && g.GameId == guessRequestDto.GameId);
+            var game = await _service.GetGame(guessRequestDto.GameId, guessRequestDto.PlayerId);
             if (game == null)
                 return NotFound($"Game with ID '{guessRequestDto.GameId}' for Player '{guessRequestDto.PlayerId}' was not found.");
 
             //check if turn is valid
             var maxTurn = game.MaxTurns;
+            var currentTurn = await _service.GetCurrentTurn(game.GameId);
 
-            // var currentTurn = await _gameContext.GuessLogs
-            //     .Where(gl => gl.GameId == game.GameId)
-            //     .CountAsync() + 1;
-            // if (currentTurn >= maxTurn)
-            //     return BadRequest("Maximum number of turns exceeded for this game.");
-
-            if (guessRequestDto.Turn <= 0 || guessRequestDto.Turn > maxTurn)
-                return BadRequest("Turn number must be greater than zero.");
+            if (currentTurn <= 0 || currentTurn > maxTurn)
+                return BadRequest("Turn number must be greater than zero and less than or equal to the maximum number of turns.");
             /// need to validate turn logic more thoroughly
             /// eg. prevent duplicate turns, ensure turns are sequential, etc.
 
@@ -91,7 +87,7 @@ namespace WordledDictionaryApi.Controllers
                 Guess = guess,
                 GuessTime = DateTime.UtcNow,
                 IsCorrect = false,
-                Turn = guessRequestDto.Turn
+                Turn = currentTurn
             };
 
             //prepare result
@@ -100,7 +96,7 @@ namespace WordledDictionaryApi.Controllers
                 GameId = guessRequestDto.GameId,
                 PlayerId = guessRequestDto.PlayerId,
                 Guess = guessRequestDto.Guess,
-                Turn = guessRequestDto.Turn + 1, // increment turn for next guess ???
+                Turn = currentTurn,
                 IsCorrect = false
             };
 

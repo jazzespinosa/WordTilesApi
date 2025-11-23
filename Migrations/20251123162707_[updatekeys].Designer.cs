@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using WordledDictionaryApi.Data;
 
@@ -10,9 +11,11 @@ using WordledDictionaryApi.Data;
 namespace WordledDictionaryApi.Migrations
 {
     [DbContext(typeof(GameContext))]
-    partial class GameContextModelSnapshot : ModelSnapshot
+    [Migration("20251123162707_[updatekeys]")]
+    partial class updatekeys
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.10");
@@ -44,6 +47,9 @@ namespace WordledDictionaryApi.Migrations
                         .HasColumnType("INTEGER")
                         .HasColumnName("transaction_id");
 
+                    b.Property<int?>("GameDataGameId")
+                        .HasColumnType("INTEGER");
+
                     b.Property<int>("GameId")
                         .HasColumnType("INTEGER")
                         .HasColumnName("game_id");
@@ -66,6 +72,8 @@ namespace WordledDictionaryApi.Migrations
                         .HasColumnName("turn");
 
                     b.HasKey("TransactionId");
+
+                    b.HasIndex("GameDataGameId");
 
                     b.HasIndex("GameId");
 
@@ -114,8 +122,12 @@ namespace WordledDictionaryApi.Migrations
 
             modelBuilder.Entity("WordledDictionaryApi.Models.Entities.GuessLog", b =>
                 {
-                    b.HasOne("WordledDictionaryApi.Models.Entities.GameData", "GameData")
+                    b.HasOne("WordledDictionaryApi.Models.Entities.GameData", null)
                         .WithMany("GuessLogs")
+                        .HasForeignKey("GameDataGameId");
+
+                    b.HasOne("WordledDictionaryApi.Models.Entities.GameData", "GameData")
+                        .WithMany()
                         .HasForeignKey("GameId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();

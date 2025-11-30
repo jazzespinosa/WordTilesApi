@@ -6,6 +6,6 @@ namespace WordledDictionaryApi.Models.DTOs
         public Guid PlayerId { get; set; }
         public required string Guess { get; set; }
         public int Turn { get; set; }
-        public bool IsCorrect { get; set; } = false;
+        public bool IsGuessCorrect { get; set; } = false;
     }
 }

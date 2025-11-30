@@ -1,9 +1,7 @@
-using WordledDictionaryApi.Models.Entities;
+using WordledDictionaryApi.Models.DTOs;
 
 public interface IGameService
 {
-    bool IsValidWord(string guess);
-    int GetScore(string guess);
-    Task<GameData?> GetGame(int gameId, Guid playerId);
-    Task<int> GetCurrentTurn(int gameId);
+    Task<GuessResponseDto> ProcessGuess(int gameId, Guid playerId, string guess);
+    Task<NewGameResponseDto> CreateGame(Guid playerId, int wordLength, int maxTurns);
 }

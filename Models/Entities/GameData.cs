@@ -11,7 +11,15 @@ namespace WordledDictionaryApi.Models.Entities
         public Guid PlayerId { get; set; }
         [Column("max_turns")]
         public int MaxTurns { get; set; }
-
+        [Column("is_win")]
+        public Status GameStatus { get; set; } = Status.InProgress;
         public ICollection<GuessLog> GuessLogs { get; set; } = new List<GuessLog>();
+    }
+
+    public enum Status
+    {
+        InProgress,
+        Won,
+        Lost
     }
 }

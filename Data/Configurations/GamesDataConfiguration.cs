@@ -9,9 +9,17 @@ public class GamesDataConfiguration : IEntityTypeConfiguration<GameData>
         builder.HasKey(g => g.GameId);
         builder.OwnsOne(g => g.Word, word =>
         {
-            word.Property(w => w.Value).HasColumnType("string").IsRequired();
-            word.Property(w => w.Length).HasColumnType("int").IsRequired();
+            word.Property(w => w.Value)
+                .HasColumnType("string")
+                .IsRequired();
+            word.Property(w => w.Length)
+                .HasColumnType("int")
+                .IsRequired();
         });
+        builder.Property(g => g.GameStatus)
+            .HasConversion<string>()
+            .HasColumnType("string")
+            .IsRequired();
 
     }
 }

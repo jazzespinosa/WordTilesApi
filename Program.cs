@@ -1,6 +1,7 @@
 
 using WordledDictionaryApi.Data;
 using Microsoft.EntityFrameworkCore;
+using WordledDictionaryApi.Services.Implementations;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -46,7 +47,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseCors();
-
+app.UseExceptionHandler("/error");
 app.UseHttpsRedirection();
 app.MapControllers();
 app.Run();

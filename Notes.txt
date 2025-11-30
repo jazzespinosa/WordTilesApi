@@ -1,7 +1,12 @@
 To dos and Suggestions:
 - make the api endpoint secure (keys???, JWT, OAuth)
-- implement a game service
 - implement transactions in EF Core
-- enhance turn handling
-- adding model validation - [Required]
-- separate the DTO for request and response : Done
+- adding model validation - '[Required]' tag
+- ??? try to implement service result [FluentResults, OneOf, ErrorOr]
+
+
+
+Done Tasks:
+-separate the DTO for request and response
+- enhance turn handling (for further enhancement)
+- implement a game service 

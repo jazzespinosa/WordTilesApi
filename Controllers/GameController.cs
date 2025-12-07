@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using WordledDictionaryApi.Data;
 using WordledDictionaryApi.Models.DTOs;
+using WordledDictionaryApi.Services.Interfaces;
 
 namespace WordledDictionaryApi.Controllers
 {

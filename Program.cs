@@ -2,6 +2,7 @@
 using WordledDictionaryApi.Data;
 using Microsoft.EntityFrameworkCore;
 using WordledDictionaryApi.Services.Implementations;
+using WordledDictionaryApi.Services.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 

@@ -1,7 +1,10 @@
 using WordledDictionaryApi.Models.DTOs;
 
-public interface IGameService
+namespace WordledDictionaryApi.Services.Interfaces
 {
-    Task<GuessResponseDto> ProcessGuess(int gameId, Guid playerId, string guess);
-    Task<NewGameResponseDto> CreateGame(Guid playerId, int wordLength, int maxTurns);
-}
+    public interface IGameService
+    {
+        Task<GuessResponseDto> ProcessGuess(int gameId, Guid playerId, string guess);
+        Task<NewGameResponseDto> CreateGame(Guid playerId, int wordLength, int maxTurns);
+    }
+}   

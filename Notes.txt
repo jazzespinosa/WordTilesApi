@@ -3,7 +3,7 @@ To dos and Suggestions:
 - implement transactions in EF Core
 - adding model validation - '[Required]' tag
 - ??? try to implement service result [FluentResults, OneOf, ErrorOr]
-
+- Connect FE to BE
 
 
 Done Tasks:

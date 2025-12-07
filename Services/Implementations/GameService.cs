@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using WordledDictionaryApi.Data;
 using WordledDictionaryApi.Models.DTOs;
 using WordledDictionaryApi.Models.Entities;
+using WordledDictionaryApi.Services.Interfaces;
 
 namespace WordledDictionaryApi.Services.Implementations
 {
@@ -16,15 +17,19 @@ namespace WordledDictionaryApi.Services.Implementations
 
         public async Task<NewGameResponseDto> CreateGame(Guid playerId, int wordLength, int maxTurns)
         {
-            var words = await _gameContext.ValidWords
+            var wordsCount = await _gameContext.ValidWords
                 .Where(w => w.Word.Length == wordLength)
-                .ToListAsync();
+                .CountAsync();
 
-            if (words.Count == 0)
+            if (wordsCount == 0)
                 throw new ArgumentException($"No words of length {wordLength} found.");
 
-            var randomIndex = new Random().Next(words.Count);
-            var gameWord = words[randomIndex];
+            var randomIndex = new Random().Next(wordsCount);
+            var gameWord = await _gameContext.ValidWords
+                .Where(w => w.Word.Length == wordLength)
+                .Skip(randomIndex)
+                .Take(1)
+                .FirstOrDefaultAsync();
 
             var gameData = new GameData
             {
@@ -95,7 +100,7 @@ namespace WordledDictionaryApi.Services.Implementations
                 result.IsGuessCorrect = true;
 
                 //update game status
-                UpdateStatus(Status.Won, game);
+                await UpdateStatus(Status.Won, game);
             }
             else
             {
@@ -105,7 +110,7 @@ namespace WordledDictionaryApi.Services.Implementations
                 if (currentTurn == maxTurn)
                 {
                     //update game status
-                    UpdateStatus(Status.Lost, game);
+                    await UpdateStatus(Status.Lost, game);
                 }
             }
 
@@ -140,8 +145,8 @@ namespace WordledDictionaryApi.Services.Implementations
             var word = await _gameContext.ValidWords
                 .FirstOrDefaultAsync(w => w.Word.Value == guess);
 
-            if (guess == null)
-                return false;
+            // if (guess == null)
+            //     return false;
 
             return word != null;
         }
@@ -157,7 +162,7 @@ namespace WordledDictionaryApi.Services.Implementations
             return string.Equals(game.Word.Value, guess, StringComparison.OrdinalIgnoreCase);
         }
 
-        public async void UpdateStatus(Status status, GameData game)
+        public async Task UpdateStatus(Status status, GameData game)
         {
             game.GameStatus = status;
             _gameContext.GamesData.Update(game);

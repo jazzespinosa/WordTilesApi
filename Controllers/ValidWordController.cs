@@ -1,28 +1,28 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using WordledDictionaryApi.Data;
-using WordledDictionaryApi.Models.DTOs;
-using WordledDictionaryApi.Models.Entities;
+using WordTilesApi.Data;
+using WordTilesApi.Models.DTOs;
+using WordTilesApi.Models.Entities;
+using WordTilesApi.Services.Interfaces;
 
-namespace WordledDictionaryApi.Controllers
+namespace WordTilesApi.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
     public class ValidWordController : ControllerBase
     {
-        private readonly GameContext _context;
+        private readonly IGameService _gameService;
 
-        public ValidWordController(GameContext context)
+        public ValidWordController(IGameService gameService)
         {
-            _context = context;
+            _gameService = gameService;
         }
 
         // GET: api/dictionary/word/cat
         [HttpGet("word/{word}")]
         public async Task<IActionResult> GetWord(string word)
         {
-            var entry = await _context.ValidWords
-                .FirstOrDefaultAsync(w => w.Word.Value.ToLower() == word.ToLower());
+            var entry = await _gameService.GetWord(word);
 
             if (entry == null)
                 return NotFound($"The word '{word}' was not found.");
@@ -30,62 +30,39 @@ namespace WordledDictionaryApi.Controllers
             return Ok(entry);
         }
 
-        // GET: api/dictionary/length/3
-        // [HttpGet("length/{wordLength}")]
-        // public async Task<IActionResult> GetRandomWordByLength(int wordLength)
-        // {
-        //     var words = await _context.Entries
-        //         .Where(e => e.Word.Length == wordLength)
-        //         .ToListAsync();
-
-        //     if (words.Count == 0)
-        //         return NotFound($"No words of length {wordLength} found.");
-
-        //     var randomIndex = new Random().Next(words.Count);
-        //     var randomWord = words[randomIndex];
-        //     var output = new
-        //     {
-        //         Word = randomWord.Word.Value,
-        //         Length = randomWord.Word.Length
-        //     };
-
-        //     return Ok(output);
-        // }
-
-        // // GET: api/dictionary/search?term=ca
-        // [HttpGet("search")]
-        // public async Task<IActionResult> Search([FromQuery] string term)
-        // {
-        //     var results = await _context.Entries
-        //         .Where(e => e.Word.Value.ToLower().StartsWith(term.ToLower()))
-        //         .ToListAsync();
-
-        //     return Ok(results);
-        // }
-
         // POST: api/dictionary
-        [HttpPost]
-        public async Task<IActionResult> AddWord([FromBody] WordDto[] entries)
+        [HttpPost("words")]
+        public async Task<IActionResult> AddWords([FromBody] WordDto[] entries)
         {
             if (entries == null || entries.Length == 0)
             {
                 return BadRequest("No words to add.");
             }
-            else
-            {
-                foreach (var item in entries)
-                {
-                    var entry = new ValidWord
-                    {
-                        Id = 0,
-                        Word = new WordData(item.Word)
-                    };
 
-                    _context.ValidWords.Add(entry);
-                }
-                await _context.SaveChangesAsync();
-                return CreatedAtAction(nameof(GetWord), new { word = entries }, entries);
-            }
+            var added = await _gameService.AddWords(entries);
+
+            return Ok(new { Added = added });
         }
+
+        /// <summary>
+        /// Import words from a CSV file
+        /// CSV file must have the following format:
+        /// Word,IsSolution
+        /// where Word is the word <string> and IsSolution <bolean> is true if the word is a solution
+        /// </summary>
+        /// <param name="file"></param>
+        /// <returns></returns>
+        [HttpPost("import-words")]
+        [Consumes("multipart/form-data")]
+        public async Task<IActionResult> ImportWords(IFormFile file)
+        {
+            if (file == null || file.Length == 0)
+                return BadRequest("CSV file is required.");
+
+            int added = await _gameService.ImportWordsFromCsv(file);
+
+            return Ok(new { Added = added });
+        }
+
     }
 }

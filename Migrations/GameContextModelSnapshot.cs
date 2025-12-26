@@ -3,11 +3,11 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using WordledDictionaryApi.Data;
+using WordTilesApi.Data;
 
 #nullable disable
 
-namespace WordledDictionaryApi.Migrations
+namespace WordTilesApi.Migrations
 {
     [DbContext(typeof(GameContext))]
     partial class GameContextModelSnapshot : ModelSnapshot
@@ -17,17 +17,17 @@ namespace WordledDictionaryApi.Migrations
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.10");
 
-            modelBuilder.Entity("WordledDictionaryApi.Models.Entities.GameData", b =>
+            modelBuilder.Entity("WordTilesApi.Models.Entities.GameData", b =>
                 {
                     b.Property<int>("GameId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER")
                         .HasColumnName("game_id");
 
-                    b.Property<string>("IsWin")
+                    b.Property<string>("GameStatus")
                         .IsRequired()
                         .HasColumnType("string")
-                        .HasColumnName("is_win");
+                        .HasColumnName("game_status");
 
                     b.Property<int>("MaxTurns")
                         .HasColumnType("INTEGER")
@@ -39,10 +39,12 @@ namespace WordledDictionaryApi.Migrations
 
                     b.HasKey("GameId");
 
+                    b.HasIndex("PlayerId");
+
                     b.ToTable("GamesData");
                 });
 
-            modelBuilder.Entity("WordledDictionaryApi.Models.Entities.GuessLog", b =>
+            modelBuilder.Entity("WordTilesApi.Models.Entities.GuessLog", b =>
                 {
                     b.Property<long>("TransactionId")
                         .ValueGeneratedOnAdd()
@@ -66,6 +68,10 @@ namespace WordledDictionaryApi.Migrations
                         .HasColumnType("INTEGER")
                         .HasColumnName("is_correct");
 
+                    b.Property<int>("MaxTurns")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("max_turns");
+
                     b.Property<int>("Turn")
                         .HasColumnType("INTEGER")
                         .HasColumnName("turn");
@@ -77,21 +83,60 @@ namespace WordledDictionaryApi.Migrations
                     b.ToTable("GuessLogs");
                 });
 
-            modelBuilder.Entity("WordledDictionaryApi.Models.Entities.ValidWord", b =>
+            modelBuilder.Entity("WordTilesApi.Models.Entities.UserData", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("FirebaseUid")
+                        .IsRequired()
+                        .HasColumnType("TEXT")
+                        .HasColumnName("firebase_uid");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("PlayerId")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("player_id");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("UserData");
+                });
+
+            modelBuilder.Entity("WordTilesApi.Models.Entities.ValidWord", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER")
                         .HasColumnName("id");
 
+                    b.Property<bool>("IsSolution")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("is_solution");
+
                     b.HasKey("Id");
 
                     b.ToTable("ValidWords");
                 });
 
-            modelBuilder.Entity("WordledDictionaryApi.Models.Entities.GameData", b =>
+            modelBuilder.Entity("WordTilesApi.Models.Entities.GameData", b =>
                 {
-                    b.OwnsOne("WordledDictionaryApi.Models.Entities.WordData", "Word", b1 =>
+                    b.HasOne("WordTilesApi.Models.Entities.UserData", "UserData")
+                        .WithMany("GameData")
+                        .HasForeignKey("PlayerId")
+                        .HasPrincipalKey("PlayerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.OwnsOne("WordTilesApi.Models.Entities.WordData", "Word", b1 =>
                         {
                             b1.Property<int>("GameDataGameId")
                                 .HasColumnType("INTEGER");
@@ -113,13 +158,15 @@ namespace WordledDictionaryApi.Migrations
                                 .HasForeignKey("GameDataGameId");
                         });
 
+                    b.Navigation("UserData");
+
                     b.Navigation("Word")
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("WordledDictionaryApi.Models.Entities.GuessLog", b =>
+            modelBuilder.Entity("WordTilesApi.Models.Entities.GuessLog", b =>
                 {
-                    b.HasOne("WordledDictionaryApi.Models.Entities.GameData", "GameData")
+                    b.HasOne("WordTilesApi.Models.Entities.GameData", "GameData")
                         .WithMany("GuessLogs")
                         .HasForeignKey("GameId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -128,9 +175,9 @@ namespace WordledDictionaryApi.Migrations
                     b.Navigation("GameData");
                 });
 
-            modelBuilder.Entity("WordledDictionaryApi.Models.Entities.ValidWord", b =>
+            modelBuilder.Entity("WordTilesApi.Models.Entities.ValidWord", b =>
                 {
-                    b.OwnsOne("WordledDictionaryApi.Models.Entities.WordData", "Word", b1 =>
+                    b.OwnsOne("WordTilesApi.Models.Entities.WordData", "Word", b1 =>
                         {
                             b1.Property<int>("ValidWordId")
                                 .HasColumnType("INTEGER");
@@ -157,9 +204,14 @@ namespace WordledDictionaryApi.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("WordledDictionaryApi.Models.Entities.GameData", b =>
+            modelBuilder.Entity("WordTilesApi.Models.Entities.GameData", b =>
                 {
                     b.Navigation("GuessLogs");
+                });
+
+            modelBuilder.Entity("WordTilesApi.Models.Entities.UserData", b =>
+                {
+                    b.Navigation("GameData");
                 });
 #pragma warning restore 612, 618
         }

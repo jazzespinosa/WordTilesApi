@@ -1,4 +1,4 @@
-namespace WordledDictionaryApi.Models.DTOs
+namespace WordTilesApi.Models.DTOs
 {
     public class GuessResponseDto
     {
@@ -7,5 +7,15 @@ namespace WordledDictionaryApi.Models.DTOs
         public required string Guess { get; set; }
         public int Turn { get; set; }
         public bool IsGuessCorrect { get; set; } = false;
+        public string Answer { get; set; } = string.Empty;
+        public LetterState[] LetterStates { get; set; } = [];
+    }
+
+    public enum LetterState
+    {
+        Correct,
+        Present,
+        Incorrect,
+        Default
     }
 }

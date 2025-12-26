@@ -1,4 +1,4 @@
-namespace WordledDictionaryApi.Models.DTOs
+namespace WordTilesApi.Models.DTOs
 {
     public class NewGameResponseDto
     {

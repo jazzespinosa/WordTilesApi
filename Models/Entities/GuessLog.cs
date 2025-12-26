@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace WordledDictionaryApi.Models.Entities
+namespace WordTilesApi.Models.Entities
 {
     public class GuessLog
     {
@@ -16,6 +16,8 @@ namespace WordledDictionaryApi.Models.Entities
         public required bool IsCorrect { get; set; }
         [Column("turn")]
         public int Turn { get; set; }
+        [Column("max_turns")]
+        public int MaxTurns { get; set; }
 
         public GameData GameData { get; set; }     // Navigation
 

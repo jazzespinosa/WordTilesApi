@@ -1,20 +1,18 @@
 using Microsoft.AspNetCore.Mvc;
-using WordledDictionaryApi.Data;
-using WordledDictionaryApi.Models.DTOs;
-using WordledDictionaryApi.Services.Interfaces;
+using WordTilesApi.Data;
+using WordTilesApi.Models.DTOs;
+using WordTilesApi.Services.Interfaces;
 
-namespace WordledDictionaryApi.Controllers
+namespace WordTilesApi.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
     public class GameController : ControllerBase
     {
-        private readonly GameContext _gameContext;
         private readonly IGameService _service;
 
-        public GameController(GameContext gameContext, IGameService service)
+        public GameController(IGameService service)
         {
-            _gameContext = gameContext;
             _service = service;
         }
 
@@ -28,7 +26,6 @@ namespace WordledDictionaryApi.Controllers
             );
 
             return Ok(newGameResult);
-
         }
 
         [HttpPost("guess")]
@@ -43,5 +40,23 @@ namespace WordledDictionaryApi.Controllers
             return Ok(guessResult);
         }
 
+        [HttpGet("get/{playerId}")]
+        public async Task<IActionResult> GetActiveGame(Guid playerId)
+        {
+            var gameResponse = await _service.GetGame(playerId);
+
+            if (gameResponse == null)
+                return NotFound("Game not found.");
+
+            return Ok(gameResponse);
+        }
+
+        [HttpPost("{gameId}/answer")]
+        public async Task<IActionResult> GetAnswer([FromBody] Guid playerId, int gameId)
+        {
+            var gameAnswer = await _service.GetAnswer(gameId, playerId);
+
+            return Ok(gameAnswer);
+        }
     }
 }

@@ -5,8 +5,7 @@ To dos and Suggestions:
 - ??? try to implement service result [FluentResults, OneOf, ErrorOr]
 - Connect FE to BE
 
-
 Done Tasks:
--separate the DTO for request and response
+- separate the DTO for request and response
 - enhance turn handling (for further enhancement)
 - implement a game service 

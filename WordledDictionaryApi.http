@@ -1,6 +1,0 @@
-@WordledDictionaryApi_HostAddress = http://localhost:5059
-
-GET {{WordledDictionaryApi_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###

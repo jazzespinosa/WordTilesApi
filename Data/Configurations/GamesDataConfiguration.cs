@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using WordledDictionaryApi.Models.Entities;
+using WordTilesApi.Models.Entities;
 
 public class GamesDataConfiguration : IEntityTypeConfiguration<GameData>
 {
@@ -20,6 +20,12 @@ public class GamesDataConfiguration : IEntityTypeConfiguration<GameData>
             .HasConversion<string>()
             .HasColumnType("string")
             .IsRequired();
+        builder.HasOne(g => g.UserData)
+            .WithMany(u => u.GameData)
+            .HasForeignKey(g => g.PlayerId)
+            .HasPrincipalKey(u => u.PlayerId)
+            .IsRequired()
+            .OnDelete(DeleteBehavior.Cascade);
 
     }
 }

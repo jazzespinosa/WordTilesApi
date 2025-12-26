@@ -1,8 +1,8 @@
 
-using WordledDictionaryApi.Data;
+using WordTilesApi.Data;
 using Microsoft.EntityFrameworkCore;
-using WordledDictionaryApi.Services.Implementations;
-using WordledDictionaryApi.Services.Interfaces;
+using WordTilesApi.Services.Implementations;
+using WordTilesApi.Services.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 

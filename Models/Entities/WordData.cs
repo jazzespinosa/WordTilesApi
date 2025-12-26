@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace WordledDictionaryApi.Models.Entities
+namespace WordTilesApi.Models.Entities
 {
     public class WordData
     {

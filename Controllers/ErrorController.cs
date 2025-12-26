@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 
-namespace WordledDictionaryApi.Controllers
+namespace WordTilesApi.Controllers
 {
     [ApiController]
     public class ErrorController : ControllerBase

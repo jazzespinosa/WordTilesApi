@@ -1,10 +1,10 @@
 using Microsoft.EntityFrameworkCore;
-using WordledDictionaryApi.Data;
-using WordledDictionaryApi.Models.DTOs;
-using WordledDictionaryApi.Models.Entities;
-using WordledDictionaryApi.Services.Interfaces;
+using WordTilesApi.Data;
+using WordTilesApi.Models.DTOs;
+using WordTilesApi.Models.Entities;
+using WordTilesApi.Services.Interfaces;
 
-namespace WordledDictionaryApi.Services.Implementations
+namespace WordTilesApi.Services.Implementations
 {
     public class GameService : IGameService
     {
@@ -17,16 +17,16 @@ namespace WordledDictionaryApi.Services.Implementations
 
         public async Task<NewGameResponseDto> CreateGame(Guid playerId, int wordLength, int maxTurns)
         {
-            var wordsCount = await _gameContext.ValidWords
-                .Where(w => w.Word.Length == wordLength)
+            var solutionsCount = await _gameContext.ValidWords
+                .Where(w => w.Word.Length == wordLength && w.IsSolution)
                 .CountAsync();
 
-            if (wordsCount == 0)
+            if (solutionsCount == 0)
                 throw new ArgumentException($"No words of length {wordLength} found.");
 
-            var randomIndex = new Random().Next(wordsCount);
+            var randomIndex = new Random().Next(solutionsCount);
             var gameWord = await _gameContext.ValidWords
-                .Where(w => w.Word.Length == wordLength)
+                .Where(w => w.Word.Length == wordLength && w.IsSolution)
                 .Skip(randomIndex)
                 .Take(1)
                 .FirstOrDefaultAsync();
@@ -35,10 +35,34 @@ namespace WordledDictionaryApi.Services.Implementations
             {
                 PlayerId = playerId,
                 Word = gameWord.Word,
+                GameStatus = Status.InProgress,
                 MaxTurns = maxTurns
             };
 
+            var inProgressGames = await _gameContext.GamesData
+                .Where(gd => gd.GameStatus == Status.InProgress && gd.PlayerId == playerId)
+                .ToArrayAsync();
+
+            foreach (var game in inProgressGames)
+            {
+                game.GameStatus = Status.Lost;
+                await _gameContext.SaveChangesAsync();
+            }
+
             _gameContext.GamesData.Add(gameData);
+            await _gameContext.SaveChangesAsync();
+
+            var guessLog = new GuessLog
+            {
+                GameId = gameData.GameId,
+                Guess = "NEW_GAME",
+                GuessTime = DateTime.UtcNow,
+                IsCorrect = false,
+                Turn = 0,
+                MaxTurns = gameData.MaxTurns
+            };
+
+            _gameContext.GuessLogs.Add(guessLog);
             await _gameContext.SaveChangesAsync();
 
             return new NewGameResponseDto
@@ -76,10 +100,11 @@ namespace WordledDictionaryApi.Services.Implementations
             var guessLog = new GuessLog
             {
                 GameId = game.GameId,
-                Guess = guess,
+                Guess = guess.Trim().ToUpper(),
                 GuessTime = DateTime.UtcNow,
                 IsCorrect = false,
-                Turn = currentTurn
+                Turn = currentTurn,
+                MaxTurns = maxTurn
             };
 
             //prepare result
@@ -89,15 +114,19 @@ namespace WordledDictionaryApi.Services.Implementations
                 PlayerId = game.PlayerId,
                 Guess = guess,
                 Turn = currentTurn,
-                IsGuessCorrect = false
+                IsGuessCorrect = false,
+                Answer = string.Empty,
+                LetterStates = new LetterState[guess.Length]
             };
 
             //check if guess is correct
-            bool isGuessCorrect = await IsGuessCorrect(game.GameId, game.PlayerId, guess);
-            if (isGuessCorrect)
+            var isGuessCorrect = await IsGuessCorrect(game.GameId, game.PlayerId, guess);
+            result.LetterStates = isGuessCorrect.LetterResults;
+            if (isGuessCorrect.IsCorrect)
             {
                 guessLog.IsCorrect = true;
                 result.IsGuessCorrect = true;
+                result.Answer = game.Word.Value;
 
                 //update game status
                 await UpdateStatus(Status.Won, game);
@@ -109,6 +138,8 @@ namespace WordledDictionaryApi.Services.Implementations
 
                 if (currentTurn == maxTurn)
                 {
+                    result.Answer = game.Word.Value;
+
                     //update game status
                     await UpdateStatus(Status.Lost, game);
                 }
@@ -129,12 +160,52 @@ namespace WordledDictionaryApi.Services.Implementations
             return game;
         }
 
+        public async Task<GetGameResponseDto?> GetGame(Guid playerId)
+        {
+            var game = await _gameContext.GamesData
+                .OrderByDescending(g => g.GameId)
+                .FirstOrDefaultAsync(g => g.PlayerId == playerId && g.GameStatus == Status.InProgress);
+
+            if (game == null)
+                return null;
+
+            var guesses = await _gameContext.GuessLogs
+                    .Where(g => g.GameId == game.GameId && g.Turn > 0)
+                    .OrderBy(g => g.Turn)
+                    .Select(g => g.Guess)
+                    .ToArrayAsync();
+
+            GuessesDto[] guessesDto = [];
+            foreach (var guess in guesses)
+            {
+                var letterStates = await GetLetterStates(game.Word.Value, guess);
+                var guessDto = new GuessesDto
+                {
+                    Guess = guess,
+                    LetterStates = letterStates
+                };
+                guessesDto = guessesDto.Append(guessDto).ToArray();
+            }
+
+            var response = new GetGameResponseDto
+            {
+                GameId = game.GameId,
+                PlayerId = game.PlayerId,
+                CurrentTurn = await GetCurrentTurn(game.GameId),
+                GuessLength = game.Word.Length,
+                MaxTurns = game.MaxTurns,
+                Guesses = guessesDto
+            };
+
+            return response;
+        }
+
         public async Task<int> GetCurrentTurn(int gameId)
         {
             var turnCount = await _gameContext.GuessLogs
                 .CountAsync(g => g.GameId == gameId);
 
-            return turnCount + 1;
+            return turnCount;
         }
 
         public async Task<bool> IsGuessValid(int gameWordLength, string guess)
@@ -151,15 +222,58 @@ namespace WordledDictionaryApi.Services.Implementations
             return word != null;
         }
 
-        public async Task<bool> IsGuessCorrect(int gameId, Guid playerId, string guess)
+        public async Task<(bool IsCorrect, LetterState[] LetterResults)> IsGuessCorrect(int gameId, Guid playerId, string guess)
         {
             var game = await _gameContext.GamesData
                 .FirstOrDefaultAsync(g => g.GameId == gameId && g.PlayerId == playerId);
 
             if (game == null)
-                return false;
+                return (false, Array.Empty<LetterState>());
 
-            return string.Equals(game.Word.Value, guess, StringComparison.OrdinalIgnoreCase);
+            var gameWord = game.Word.Value.Trim().ToUpper();
+            var guessWord = guess.Trim().ToUpper();
+
+            var letterResults = await GetLetterStates(gameWord, guessWord);
+
+            return (gameWord == guessWord, letterResults);
+        }
+
+        public async Task<LetterState[]> GetLetterStates(string gameWord, string guessWord)
+        {
+            var results = new LetterState[guessWord.Length];
+
+            for (int i = 0; i < guessWord.Length; i++)
+            {
+                // check state of letter
+                LetterState state = LetterState.Default;
+                bool isPresent = false;
+
+                for (int j = 0; j < gameWord.Length; j++)
+                {
+                    if (guessWord[i] == gameWord[j] && i == j)
+                    {
+                        state = LetterState.Correct;
+                        break;
+                    }
+                    else if (guessWord[i] == gameWord[j])
+                    {
+                        isPresent = true;
+                    }
+
+                    if (isPresent)
+                    {
+                        state = LetterState.Present;
+                    }
+                    else
+                    {
+                        state = LetterState.Incorrect;
+                    }
+                }
+
+                results[i] = state;
+            }
+
+            return results;
         }
 
         public async Task UpdateStatus(Status status, GameData game)
@@ -167,6 +281,124 @@ namespace WordledDictionaryApi.Services.Implementations
             game.GameStatus = status;
             _gameContext.GamesData.Update(game);
             await _gameContext.SaveChangesAsync();
+        }
+
+        public async Task<Status?> GetGameState(int gameId, Guid playerId)
+        {
+            return await _gameContext.GamesData
+            .Where(g => g.GameId == gameId && g.PlayerId == playerId)
+            .Select(g => g.GameStatus).FirstOrDefaultAsync();
+        }
+
+        public async Task<string> GetAnswer(int gameId, Guid playerId)
+        {
+            var gameState = await GetGameState(gameId, playerId);
+            if (gameState == null || gameState == Status.Unknown)
+            {
+                throw new ArgumentException("Game not found.");
+            }
+            else if (gameState == Status.InProgress)
+            {
+                throw new ArgumentException("Game is still in progress.");
+            }
+            else
+            {
+                return await _gameContext.GamesData
+                .Where(g => g.GameId == gameId && g.PlayerId == playerId)
+                .Select(g => g.Word.Value)
+                .FirstOrDefaultAsync() ?? throw new ArgumentException("Game not found.");
+            }
+        }
+
+        public async Task<ValidWord?> GetWord(string word)
+        {
+            return await _gameContext.ValidWords
+                .FirstOrDefaultAsync(w => w.Word.Value.ToUpper() == word.ToUpper());
+        }
+
+        public async Task<int> AddWords(WordDto[] entries)
+        {
+            const int batchSize = 1000;
+            int count = 0;
+            var batch = new List<ValidWord>(batchSize);
+
+            foreach (var item in entries)
+            {
+                batch.Add(new ValidWord
+                {
+                    Word = new WordData(item.Word.ToUpper()),
+                    IsSolution = item.IsSolution
+                });
+
+                if (batch.Count == batchSize)
+                {
+                    await _gameContext.ValidWords.AddRangeAsync(batch);
+                    await _gameContext.SaveChangesAsync();
+                    batch.Clear();
+                }
+                count++;
+            }
+
+            // Save remaining items
+            if (batch.Count > 0)
+            {
+                await _gameContext.ValidWords.AddRangeAsync(batch);
+                await _gameContext.SaveChangesAsync();
+            }
+            return count;
+        }
+
+        public async Task<int> ImportWordsFromCsv(IFormFile file)
+        {
+            const int batchSize = 1000;
+            int count = 0;
+            var batch = new List<ValidWord>(batchSize);
+
+            _gameContext.ChangeTracker.AutoDetectChangesEnabled = false;
+
+            using var stream = file.OpenReadStream();
+            using var reader = new StreamReader(stream);
+
+            // Skip header line
+            await reader.ReadLineAsync();
+
+            while (!reader.EndOfStream)
+            {
+                var line = await reader.ReadLineAsync();
+                if (string.IsNullOrWhiteSpace(line))
+                    continue;
+
+                var parts = line.Split(',');
+
+                if (parts.Length < 2)
+                    continue;
+
+                batch.Add(new ValidWord
+                {
+                    Word = new WordData(parts[0].Trim().ToUpper()),
+                    IsSolution = bool.Parse(parts[1])
+                });
+
+                if (batch.Count == batchSize)
+                {
+                    await _gameContext.ValidWords.AddRangeAsync(batch);
+                    await _gameContext.SaveChangesAsync();
+
+                    count += batch.Count;
+                    batch.Clear();
+                }
+            }
+
+            // Insert remaining rows
+            if (batch.Count > 0)
+            {
+                await _gameContext.ValidWords.AddRangeAsync(batch);
+                await _gameContext.SaveChangesAsync();
+                count += batch.Count;
+            }
+            _gameContext.ChangeTracker.AutoDetectChangesEnabled = true;
+
+            return count;
         }
 
     }

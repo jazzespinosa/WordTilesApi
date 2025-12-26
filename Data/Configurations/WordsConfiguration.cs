@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using WordledDictionaryApi.Models.Entities;
+using WordTilesApi.Models.Entities;
 
 public class WordsConfiguration : IEntityTypeConfiguration<ValidWord>
 {

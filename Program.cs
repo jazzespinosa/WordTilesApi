@@ -18,9 +18,16 @@ FirebaseApp.Create(new AppOptions()
   ProjectId = "wordtiles1",
 });
 
+// Get from config 
+var sqlitePath = builder.Configuration["SQLITE_DB_PATH"];
+if (string.IsNullOrWhiteSpace(sqlitePath))
+{
+  throw new InvalidOperationException("SQLite DB path is not set.");
+}
+var connectionString = $"Data Source={sqlitePath};Cache=Shared;";
+
 // Add DbContext
-builder.Services.AddDbContext<GameContext>(options =>
-    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
+builder.Services.AddDbContext<GameContext>(options => options.UseSqlite(connectionString));
 
 // Add controllers
 builder.Services.AddControllers();
@@ -65,6 +72,10 @@ using (var scope = app.Services.CreateScope())
 {
   var gameDb = scope.ServiceProvider.GetRequiredService<GameContext>();
   gameDb.Database.Migrate();
+
+  gameDb.Database.OpenConnection();
+  gameDb.Database.ExecuteSqlRaw("PRAGMA journal_mode=WAL;");
+  gameDb.Database.CloseConnection();
 }
 
 // Configure the HTTP request pipeline.

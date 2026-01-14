@@ -4,7 +4,6 @@ namespace WordTilesApi.Models.DTOs
   {
     public long FeedbackId { get; set; } = GenerateFeedbackId();
 
-
     private static int _sequence = 0;
     private static readonly object _lock = new object();
     public static long GenerateFeedbackId()

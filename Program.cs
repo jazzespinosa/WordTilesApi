@@ -1,19 +1,19 @@
 
-using WordTilesApi.Data;
-using Microsoft.EntityFrameworkCore;
-using WordTilesApi.Services.Implementations;
-using WordTilesApi.Services.Interfaces;
 using FirebaseAdmin;
 using Google.Apis.Auth.OAuth2;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using WordTilesApi.Data;
+using WordTilesApi.env;
+using WordTilesApi.Services.Implementations;
+using WordTilesApi.Services.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Initialize Firebase Admin SDK
 FirebaseApp.Create(new AppOptions()
 {
-  //Credential = CredentialFactory.FromFile<ServiceAccountCredential>("env/ServiceAccountKeys/wordtiles1-adc.json").ToGoogleCredential()
   Credential = GoogleCredential.GetApplicationDefault(),
   ProjectId = "wordtiles1",
 });
@@ -30,6 +30,7 @@ builder.Services.AddScoped<IGameService, GameService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IWordService, WordService>();
 builder.Services.AddScoped<IUtilService, UtilService>();
+builder.Services.AddSingleton<MyEnvironment>();
 builder.Services.AddCors(options =>
 {
   options.AddDefaultPolicy(

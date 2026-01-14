@@ -3,3 +3,9 @@
 /env/ServiceAccountKeys
 
 .vs/
+
+/bin
+/bin/Debug
+/bin/Debug/net9.0
+
+/Data/data

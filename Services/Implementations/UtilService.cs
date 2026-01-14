@@ -1,12 +1,8 @@
 using Google.Cloud.Firestore;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Net.Http;
-using System.Text.Json;
 using WordTilesApi.Data;
 using WordTilesApi.env;
 using WordTilesApi.Models.DTOs;
-using WordTilesApi.Models.Entities;
 using WordTilesApi.Services.Interfaces;
 
 namespace WordTilesApi.Services.Implementations
@@ -14,18 +10,18 @@ namespace WordTilesApi.Services.Implementations
   public class UtilService : IUtilService
   {
     private readonly GameContext _gameContext;
+    private readonly MyEnvironment _env;
 
-    public UtilService(GameContext gameContext)
+    public UtilService(GameContext gameContext, MyEnvironment env)
     {
       _gameContext = gameContext;
+      _env = env;
     }
-
-    private static env.Environment environment = new();
-    private string feedbackEmailRecipient = environment.GetFeedbackEmailRecipient();
-    private string cloudFirestoreDbLink = environment.GetCloudFirestoreDbLink();
 
     public async Task<FeedbackResponseDto> TriggerEmailSend(FeedbackRequestDto feedbackRequestDto, Guid playerId)
     {
+      var feedbackEmailRecipient = _env.FeedbackEmailRecipient;
+      var cloudFirestoreDbLink = _env.CloudFirestoreDbLink;
       FirestoreDb db = FirestoreDb.Create("wordtiles1");
       var feedbackTimeStamp = DateTime.UtcNow;
       var category = feedbackRequestDto.Category;

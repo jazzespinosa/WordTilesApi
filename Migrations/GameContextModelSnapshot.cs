@@ -24,6 +24,10 @@ namespace WordTilesApi.Migrations
                         .HasColumnType("INTEGER")
                         .HasColumnName("game_id");
 
+                    b.Property<DateTime?>("EndTime")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("end_time");
+
                     b.Property<string>("GameStatus")
                         .IsRequired()
                         .HasColumnType("string")
@@ -37,9 +41,18 @@ namespace WordTilesApi.Migrations
                         .HasColumnType("TEXT")
                         .HasColumnName("player_id");
 
+                    b.Property<DateTime>("StartTime")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("start_time");
+
+                    b.Property<int?>("TurnsTaken")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("turns_taken");
+
                     b.HasKey("GameId");
 
-                    b.HasIndex("PlayerId");
+                    b.HasIndex("PlayerId")
+                        .HasDatabaseName("IX_GamesData_PlayerId");
 
                     b.ToTable("GamesData");
                 });
@@ -78,7 +91,8 @@ namespace WordTilesApi.Migrations
 
                     b.HasKey("TransactionId");
 
-                    b.HasIndex("GameId");
+                    b.HasIndex("GameId")
+                        .HasDatabaseName("IX_GuessLog_GameId");
 
                     b.ToTable("GuessLogs");
                 });
@@ -87,11 +101,13 @@ namespace WordTilesApi.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("id");
 
                     b.Property<string>("Email")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("TEXT")
+                        .HasColumnName("email");
 
                     b.Property<string>("FirebaseUid")
                         .IsRequired()
@@ -100,7 +116,8 @@ namespace WordTilesApi.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("TEXT")
+                        .HasColumnName("name");
 
                     b.Property<Guid>("PlayerId")
                         .HasColumnType("TEXT")

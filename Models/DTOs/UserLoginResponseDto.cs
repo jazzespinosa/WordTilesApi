@@ -2,7 +2,7 @@ namespace WordTilesApi.Models.DTOs
 {
     public class UserLoginResponseDto
     {
-        public int email { get; set; }
-        public required string name { get; set; }
+        public required string Email { get; set; }
+        public required string Name { get; set; }
     }
 }

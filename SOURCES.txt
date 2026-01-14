@@ -1,0 +1,11 @@
+Sources:
+
+Solutions
+https://kaikki.org/dictionary/English/
+https://github.com/first20hours/google-10000-english/tree/master?tab=readme-ov-file
+
+Valid Words
+https://github.com/scrabblewords/scrabblewords/blob/main/words/North-American/NSWL2023.txt
+
+Keyboard
+https://github.com/hodgef/simple-keyboard

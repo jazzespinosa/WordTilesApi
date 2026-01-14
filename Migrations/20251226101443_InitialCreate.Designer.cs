@@ -10,7 +10,7 @@ using WordTilesApi.Data;
 
 namespace WordTilesApi.Migrations
 {
-    [DbContext(typeof(GameContext))]
+    [DbContext(typeof(Data.GameContext))]
     [Migration("20251226101443_InitialCreate")]
     partial class InitialCreate
     {

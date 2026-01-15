@@ -43,7 +43,7 @@ builder.Services.AddCors(options =>
   options.AddDefaultPolicy(
       policy =>
       {
-        policy.WithOrigins(["http://localhost:4200"])
+        policy.WithOrigins(["https://wordtiles1.web.app", "https://wordtiles1.firebaseapp.com"])
                 .AllowAnyHeader()
                 .AllowAnyMethod();
       });

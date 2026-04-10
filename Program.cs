@@ -47,6 +47,13 @@ builder.Services.AddCors(options =>
                 .AllowAnyHeader()
                 .AllowAnyMethod();
       });
+  options.AddPolicy("AllowDevelopmentOrigins",
+      policy =>
+      {
+        policy.WithOrigins(["http://localhost:4200"])
+                .AllowAnyHeader()
+                .AllowAnyMethod();
+      });
 });
 // Set up JWT Authentication for Firebase
 builder.Services
@@ -83,11 +90,17 @@ if (app.Environment.IsDevelopment())
 {
   app.UseSwagger();
   app.UseSwaggerUI();
+
+  app.UseCors("AllowDevelopmentOrigins");
+}
+else
+{
+  app.UseCors();
 }
 
-app.UseExceptionHandler("/error");
+  app.UseExceptionHandler("/error");
 app.UseHttpsRedirection();
-app.UseCors();
+//app.UseCors();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();

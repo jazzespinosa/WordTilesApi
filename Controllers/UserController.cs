@@ -16,25 +16,25 @@ namespace WordTilesApi.Controllers
       _userService = userService;
     }
 
-    // [HttpGet("get/{firebaseUid}")]
-    // [Authorize]
-    // public async Task<IActionResult> GetUserName(string firebaseUid)
-    // {
-    //     return Ok();
-    // }
-
     [HttpPost("signup")]
     [Authorize]
-    public async Task<IActionResult> SignUp([FromBody] UserSignUpRequestDto userSignUpRequestDto)
+    public async Task<IActionResult> SignUp(
+      [FromBody] UserSignUpRequestDto userSignUpRequestDto
+    )
     {
       var firebaseUid = GetFirebaseUid();
-      var response = await _userService.SignUp(userSignUpRequestDto, firebaseUid);
+      var response = await _userService.SignUp(
+        userSignUpRequestDto,
+        firebaseUid
+      );
       return CreatedAtAction(nameof(SignUp), response);
     }
 
     [HttpPost("login")]
     [Authorize]
-    public async Task<IActionResult> Login([FromBody] UserLoginRequestDto userLoginRequestDto)
+    public async Task<IActionResult> Login(
+      [FromBody] UserLoginRequestDto userLoginRequestDto
+    )
     {
       var firebaseUid = GetFirebaseUid();
       var response = await _userService.Login(userLoginRequestDto, firebaseUid);
@@ -46,11 +46,14 @@ namespace WordTilesApi.Controllers
     public async Task<IActionResult> LoginAsGuest()
     {
       var firebaseUid = GetFirebaseUid();
-      var response = await _userService.Login(new UserLoginRequestDto { Email = "guest" }, firebaseUid);
+      var response = await _userService.Login(
+        new UserLoginRequestDto { Email = "guest" },
+        firebaseUid
+      );
       return Ok(response);
     }
 
-    private string GetFirebaseUid() => User.FindFirst("user_id")?.Value ?? string.Empty;
-
+    private string GetFirebaseUid() =>
+      User.FindFirst("user_id")?.Value ?? string.Empty;
   }
 }

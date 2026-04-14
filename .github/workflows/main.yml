@@ -17,8 +17,6 @@ jobs:
         
       - name: Build
         run: dotnet build --configuration Release --no-restore
-        env:
-          CloudFirestoreDbLink: ${{ secrets.CLOUDFIRESTOREDBLINK }}
 
       - name: Publish
         run: dotnet publish --configuration Release --output ./publish --runtime win-x86 

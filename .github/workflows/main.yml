@@ -18,7 +18,6 @@ jobs:
       - name: Build
         run: dotnet build --configuration Release --no-restore
         env:
-          FeedbackEmailRecipient: ${{ secrets.FEEDBACKEMAILRECIPIENT }}
           CloudFirestoreDbLink: ${{ secrets.CLOUDFIRESTOREDBLINK }}
 
       - name: Publish

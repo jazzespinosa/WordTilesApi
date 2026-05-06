@@ -1,8 +1,4 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using WordTilesApi.Data;
-using WordTilesApi.Models.DTOs;
-using WordTilesApi.Models.Entities;
 using WordTilesApi.Services.Interfaces;
 
 namespace WordTilesApi.Controllers
@@ -18,7 +14,6 @@ namespace WordTilesApi.Controllers
       _wordService = wordService;
     }
 
-    // GET: api/dictionary/word/cat
     [HttpGet("word/{word}")]
     public async Task<IActionResult> GetWord(string word)
     {
@@ -30,19 +25,18 @@ namespace WordTilesApi.Controllers
       return Ok(entry);
     }
 
-    // POST: api/dictionary
-    [HttpPost("words")]
-    public async Task<IActionResult> AddWords([FromBody] List<WordDto> entries)
-    {
-      if (entries == null || entries.Count == 0)
-      {
-        return BadRequest("No words to add.");
-      }
+    //[HttpPost("words")]
+    //public async Task<IActionResult> AddWords([FromBody] List<WordDto> entries)
+    //{
+    //  if (entries == null || entries.Count == 0)
+    //  {
+    //    return BadRequest("No words to add.");
+    //  }
 
-      var added = await _wordService.AddWords(entries);
+    //  var added = await _wordService.AddWords(entries);
 
-      return Ok(new { Added = added });
-    }
+    //  return Ok(new { Added = added });
+    //}
 
     /// <summary>
     /// Import words from a CSV file
@@ -52,17 +46,16 @@ namespace WordTilesApi.Controllers
     /// </summary>
     /// <param name="file"></param>
     /// <returns></returns>
-    [HttpPost("import-words")]
-    [Consumes("multipart/form-data")]
-    public async Task<IActionResult> ImportWords(IFormFile file)
-    {
-      if (file == null || file.Length == 0)
-        return BadRequest("CSV file is required.");
+    //[HttpPost("import-words")]
+    //[Consumes("multipart/form-data")]
+    //public async Task<IActionResult> ImportWords(IFormFile file)
+    //{
+    //  if (file == null || file.Length == 0)
+    //    return BadRequest("CSV file is required.");
 
-      int added = await _wordService.ImportWordsFromCsv(file);
+    //  int added = await _wordService.ImportWordsFromCsv(file);
 
-      return Ok(new { Added = added });
-    }
-
+    //  return Ok(new { Added = added });
+    //}
   }
 }
